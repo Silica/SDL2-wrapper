@@ -1,0 +1,98 @@
+SDL2のC++ラッパークラスです
+
+SDL2
+http://www.libsdl.org/
+
+その他
+SDL_image
+https://www.libsdl.org/projects/SDL_image/
+SDL_mixer
+https://www.libsdl.org/projects/SDL_mixer/
+SDL_ttf
+https://www.libsdl.org/projects/SDL_ttf/
+SDL_net
+https://www.libsdl.org/projects/SDL_net/
+に対応していますが
+全てのAPIをサポートしているわけではありません
+必要なAPIがあったり、インターフェースがおかしい場合は
+pull requestを送るかtwitterでつついて下さい
+
+
+・使い方
+SDL2.hをincludeします
+SDL.h他はSDL2ディレクトリにあることを想定しています(#include "SDL2/SDL.h"としている)
+Ubuntuでapt-getしたらそうなっていたからで深い意味はありません
+しかも自分の都合で#ifdef __ANDROID__の時だけ"SDL.h"を見にいきます
+
+MSVCの場合は必要なライブラリのリンクも書き込んであります(#pragma comment(lib, ...))
+
+クラスは全てnamespace SDL2 に入っています
+
+追加ライブラリが必要な場合は
+SDL2_image.h
+SDL2_mixer.h
+SDL2_ttf.h
+SDL2_net.h
+をそれぞれincludeします
+中でSDL2.hはincludeするので最初からこっちだけでもいいです
+
+各クラスの使い方はサンプルを見た後、各.hを見て下さい
+もう少しインターフェースが固まったら自分の為にもドキュメント書きます
+
+
+・注意点
+取り敢えず作っただけなので
+インターフェース(上でも使っていますがclassの使い心地ぐらいの意味です)について
+まだそこまで深く考えていません
+
+コンテキストに依存しないAPIでもインスタンス経由でしか呼べなかったりします
+例えばSDL_GetErrorは
+SDL2::SDL sdl;
+sdl.GetError();
+の形でしか呼べないので、それが必要ならsdlを常に持って回る必要があります
+幾つかの関数はstatic版を用意したいところではあるのですが
+今のところそこまでやっていません
+どうしても必要なら元の関数をそのまま呼ぶ手もありますが(特にSDL_GetError程度なら)
+
+同じ話で
+Hoge hoge = sdl.CreateHoge(param);
+みたいなのは
+Hoge hoge(param);
+で作れていいのではとか(そう作れるのもあります)
+
+他にも、依存関係はあっても
+Renderer r = surface.CreateRenderer();
+がいいのか
+Renderer r(surface);
+がいいのか、とか
+
+定数はSDLの提供するものをそのまま使う前提ですし
+関数名も概ね元のをそのまま使ってます
+引数の順番も考えた方がいいものやオーバーロードを用意した方がいいものもあるでしょう
+場合によっては関数の機能を切り分けたり統合したりした方がよさそうなものもあります
+
+Surface s1, s2;ってあるとして
+s1 = s2;ってするのは全く問題ないのですが(shared_ptr的なアレ)
+引数の場合に基本的に何も考えずSurface &sにしているので
+参照と一時変数のアレでコンパイラによっては渡せない場合がある
+どっちがいいかは後で考える
+
+わけあってshared_ptr的なものを自作しています
+(正確には別件で自作したそれを流用しています)
+
+WindowはSDL_Windowに対するshared_ptr的なものなのだが
+CreateWindowしたらそこで得られたWindowを使い回すことを前提としている
+しかし、全く別のところから同じSDL_Windowを得る方法がある
+例えばSDL_GetWindowFromIDがそうであるが、これをWindowに渡してしまうと
+元のWindowが残っていてもそちらが破棄された時点でWindowが削除されてしまう
+これを回避するには例えばSDLの中で全てのWindowを管理する様な方法が考えられるが
+それをすべきかどうかは難しい問題である
+ひとまずその手の関数はラッパークラスで提供していない
+
+各サンプルは実行ディレクトリに
+arial.ttf
+sample.png
+bgm.ogg
+se.ogg
+を要求することがあります
+ここの配布ファイルには含めていないので各自で用意して下さい

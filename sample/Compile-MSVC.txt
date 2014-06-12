@@ -1,0 +1,3 @@
+cl /MD lifegame.cpp
+‚İ‚½‚¢‚ÈŠ´‚¶‚¾‚ª
+WinMain‚ğg‚¤ê‡‚Í/MD‚Í•K—v‚È‚¢
